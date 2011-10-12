@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="lbfgsb_wrapper" basedir="." default="default">
+
+	<!-- Properties { -->
+	<property name="build.debug" value="true"/>
+	<property name="project.name" value="lbfgsb_wrapper"/>
+	<property name="project.version" value="1.0.2"/>
+	<property name="project.name-ver" value="${project.name}-${project.version}" />
+	<!-- Properties } -->
+	
+
+	<!-- Paths { -->
+	<property name="src.dir" location="./src"/>
+	<property name="build.dir" location="./build"/>
+	<property name="build.classes.dir" location="${build.dir}/classes"/>
+
+	<property name="test.dir" location="${build.dir}/test" />
+	<property name="test.classes.dir" location="${test.dir}/classes" />
+	<property name="test.output.dir" location="${test.dir}/output" />
+	<property name="test.reports.dir" location="${test.dir}/reports" />
+
+	<property name="dist.dir" location="./dist"/>
+	<property name="javadoc.dir.name" value="api"/>
+	<property name="javadoc.dir" location="${dist.dir}/${javadoc.dir.name}"/>
+	
+	<property name="target.file.name" value="${project.name-ver}.jar" />
+	<property name="target.jar" location="${dist.dir}/${target.file.name}" />
+	<property name="dist.zip.file.name" value="${project.name-ver}.tar.gz"/>
+	<property name="dist.zip" location="${dist.dir}/${dist.zip.file.name}" />
+	<property name="dist.src.zip.file.name" value="${project.name-ver}-src.tar.gz"/>	
+	<property name="dist.src.zip" location="${dist.dir}/${dist.src.zip.file.name}" />
+
+	<!-- Sub-projects - specific properties{-->
+	<!-- raw_wrapper project {-->
+	<property name="raw_wrapper.dist.dir" location="./raw_wrapper/dist"/>
+	<property name="raw_wrapper.src.dir" location="${raw_wrapper.dist.dir}/src"/>
+	<property name="raw_wrapper.lib.name" value="liblbfgsb_wrapper.so"/>
+
+	<property name="sub-projects.src.dirs" value="${raw_wrapper.src.dir}"/>
+	<!-- raw_wrapper project }-->
+	<!-- Sub-projects - specific properties}-->
+	
+	<path id="compile.classpath">
+	</path>
+
+	<!-- add our result library to the classpath -->	
+	<path id="test.compile.classpath">
+		<path refid="compile.classpath"/>
+		<pathelement location="${target.jar}"/>
+	</path>
+
+	<path id="test.classpath">
+		<path refid="test.compile.classpath"/>
+		<pathelement location="${test.classes.dir}"/>
+	</path>
+	
+	<fileset dir="." id="dist-bin-doc-files">
+		<include name="*.txt"/>
+		<include name="*.mkd"/>
+	</fileset>
+	<!-- Paths } -->
+
+
+	<target name="default" depends="dist"
+		description="Execute default task i.e. create distribution files"/>
+
+	<target name="test" depends="unit-tests"
+		description="compile and run all the tests"/>
+	
+	<target name="init">
+	  	<!-- Create the buildtime property containing the date 
+	  		in a sensible format -->
+		<tstamp>
+			<format property="build.time"
+				pattern="yyyy-MM-dd"/>
+		</tstamp>
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${build.classes.dir}"/>
+		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${javadoc.dir}"/>
+	</target>
+	
+	
+	<target name="compile" depends="sub-projects-dist,init">
+		<echo>debug=${build.debug}</echo>
+		<!-- Compile source with options:
+			includeAntRuntime="false" - don't include Ant run-time libraries
+			in the classpath -->
+		<javac srcdir="${src.dir}:${sub-projects.src.dirs}" 
+			destdir="${build.classes.dir}" debug="${build.debug}"
+			includeAntRuntime="false">
+			<classpath refid="compile.classpath"/>
+		</javac>
+	</target>
+
+	<!-- Create distribution files in sub-projects {-->
+	<target name="sub-projects-dist">
+		<!-- make raw_wrapper library-->
+		<exec executable="make" failonerror="true">
+			<arg value="-C"/> <arg value="raw_wrapper"/>
+		</exec>
+	</target>
+	<!-- Create distribution files in sub-projects }-->
+	
+	<target name="jar" depends="compile" description="create the JAR file">
+		<jar jarfile="${target.jar}">
+			<fileset dir="${build.classes.dir}"/>
+			<manifest>
+				<attribute name="Main-Class" value="lbfgsb.SampleRun"/>
+				<!--<attribute name="Class-Path" value="${libs.files}"/>-->
+			</manifest>
+        </jar>
+	</target>
+	
+	
+	<!-- Tests { -->
+	<target name="test-init" depends="dist">
+		<mkdir dir="${test.classes.dir}"/>
+		<delete dir="${test.output.dir}"/>
+		<delete dir="${test.reports.dir}"/>
+		<mkdir dir="${test.output.dir}"/>
+		<mkdir dir="${test.reports.dir}"/>
+	</target>
+	
+	<target name="test-compile" depends="compile,test-init">
+		<javac srcdir="test"
+			destdir="${test.classes.dir}"
+			debug="true"
+			includeAntRuntime="yes">
+			<classpath refid="test.compile.classpath"/>
+		</javac>
+	</target>
+
+	<!-- load environment variables, to get LD_LIBRARY_PATH 
+		(this entry is needed because we're using external system-dependent library)-->
+	<property environment="env"/>
+	
+	<!-- Run all JUnit tests where:
+		errorProperty="test.failed" and failureProperty="test.failed" - save
+			failures and errors to the given property -->		
+	<target name="unit-tests" depends="test-compile">
+		<junit printsummary="false"
+			errorProperty="test.failed"
+			failureProperty="test.failed"
+			fork="yes">
+			<assertions enableSystemAssertions="true"/>
+			<formatter type="brief" usefile="false"/>
+			<formatter type="xml"/>
+			<classpath refid="test.classpath" />
+			
+			<!-- Pass environment properties to the program { -->
+			<env key="debug" value="true"/>
+			<!-- override LD_LIBRARY_PATH 
+				(this entry is needed because we're using external JNI library)-->
+			<env key="LD_LIBRARY_PATH" path="${dist.dir}:${env.LD_LIBRARY_PATH}" />
+			<!-- Pass environment properties to the program } -->
+
+			<!-- Run all the test (i.e. files whose name end with "_Test.class",
+			then save the output to given dir -->
+			<batchtest todir="${test.output.dir}">
+    			<fileset dir="${test.classes.dir}">
+      				<include name="**/*_Test.class"/>
+      			</fileset>
+			</batchtest>
+		</junit>
+		
+		<!-- Generate test report based on JUnit output-->
+		<junitreport todir="${test.output.dir}">
+			<fileset dir="${test.output.dir}">
+				<include name="TEST-*.xml"/>
+		 	</fileset>
+			<report format="frames" todir="${test.reports.dir}"/>
+		</junitreport>
+
+		<!-- fail if any of the tests failed -->
+		<fail if="test.failed">
+			Tests failed. Check ${test.reports.dir}
+		</fail>
+	</target>
+	<!-- Tests } -->
+
+
+	<!-- Main artefacts{ -->
+	<target name="dist" depends="jar,sub-projects-copy-artefacts,docs" 
+		description="Create distribution files">
+	</target>
+	
+	<target name="sub-projects-copy-artefacts">
+		<copy file="${raw_wrapper.dist.dir}/${raw_wrapper.lib.name}" 
+			tofile="${dist.dir}/${raw_wrapper.lib.name}"/>
+	</target>
+	<!-- Main artefacts} -->
+	
+	
+	<!-- Documentation{ -->
+	<target name="docs" depends="javadocs" description="create documentation"/>
+
+	<target name="javadocs" depends="compile">
+		<javadoc destdir="${javadoc.dir}" 
+			packagenames="lbfgsb.*"
+			excludepackagenames="lbfgsb.jniwrapper.*"
+			sourcepath="${src.dir}:${sub-projects.src.dirs}"
+			windowtitle="${ant.project.name}"
+			failonerror="true">
+			<classpath refid="compile.classpath"/>
+		</javadoc>
+	</target>
+	<!-- Documentation} -->
+
+	<!-- Scripts{ -->	
+	<target name="scripts" depends="init">
+		<copy todir="${dist.dir}" overwrite="true">
+			<fileset dir="bin" includes="*.sh"/>
+			<filterset begintoken="@" endtoken ="@">
+				<filter token="TARGET_FILE_NAME" value="${target.file.name}"/>
+			</filterset>
+		</copy>
+		<chmod dir="${dist.dir}" perm="a+x"
+			includes="*.sh" />
+	</target>
+  	<!-- Scripts} -->
+  	
+	<!-- Distribution packages{ -->
+	<target name="dist-packages" 
+		description="Create source and bin distribution packages"
+		depends="dist-src-package,dist-bin-package" />
+
+	<target name="dist-bin-package" depends="dist,docs,scripts"
+		description="create compressed distribution file">
+		<tar destFile="${dist.zip}" compression="gzip">
+			<tarfileset dir="${dist.dir}" prefix="${project.name-ver}">
+				<include name="${target.file.name}"/>
+				<include name="${javadoc.dir.name}/**"/>
+				<include name="${raw_wrapper.lib.name}"/>
+			</tarfileset>
+			<tarfileset dir="${dist.dir}" prefix="${project.name-ver}" filemode="755">
+				<include name="*.sh"/>
+			</tarfileset>
+			<tarfileset	refid="dist-bin-doc-files" 
+				prefix="${project.name-ver}"/>
+		</tar>
+	</target>
+	
+	<target name="dist-src-package" depends="dist">
+		<tar destfile="${dist.src.zip}" compression="gzip">
+			<tarfileset dir="." prefix="${project.name-ver}-src">
+				<exclude name="**/dist/**"/>
+				<exclude name="**/build/**"/>
+				<exclude name="website/**"/>
+			</tarfileset>
+			<tarfileset dir="." prefix="${project.name-ver}-src" filemode="755">
+				<include name="bin/*"/>
+			</tarfileset>
+		</tar>
+	</target>
+	<!-- Distribution packages} -->
+
+
+  	<!-- Website{ -->
+	<!--<target name="website" depends="dist-packages,init"
+		description="Create website along with the distribution packages">
+		<copy todir="${dist.dir}" overwrite="true">
+			<fileset dir="website">
+				<include name="*.html"/>
+				<include name="*.css"/>
+			</fileset>
+			<filterset begintoken="@" endtoken ="@">
+				<filter token="BUILD_TIME" value="${build.time}"/>
+				<filter token="VERSION" value="${project.version}"/>
+				<filter token="DIST_ZIP" value="${dist.zip.file.name}"/>
+				<filter token="DIST_SRC_ZIP" value="${dist.src.zip.file.name}"/>
+			</filterset>
+		</copy>
+	</target>-->
+  	<!-- Website} -->
+  		
+	
+	<!-- Cleaning{ -->
+	<target name="clean" depends="sub-projects-clean" description="clean up" >
+		<delete dir="${build.dir}"/>
+		<delete dir="${dist.dir}"/>
+		<delete dir="${test.output.dir}"/>
+		<delete dir="${test.reports.dir}"/>
+	</target>
+
+	<target name="sub-projects-clean">
+		<!-- clean the wrapper library-->
+		<exec executable="make" failonerror="true">
+			<arg value="-C"/> <arg value="raw_wrapper"/>
+			<arg value="clean"/>
+		</exec>		
+	</target>
+	<!-- Cleaning} -->
+
+</project> 

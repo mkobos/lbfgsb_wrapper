@@ -1,0 +1,31 @@
+1.0.2 (2011-10-12)
+------------------
+- changed documentation format from HTML to markdown
+- placed the source file on Github
+
+1.0.1 (2011-06-23)
+------------------
+- minor changes in the ant's `build.xml`
+
+1.0 (2010-06-03)
+----------------
+- small fixes in the Makefile to make the compilation possible on a 64-bit system
+- added "-I $(JAVA_HOME)/include -I $(JAVA_HOME)/include/linux" in the Makefile
+- some documentation cleanup and update
+- changed compressing program for the distribution files from zip to tar+gzip
+
+0.11
+----
+- minor bug in `StopConditions` class fixed
+
+0.10
+----
+- changed interface of the `Bound` class (now the bound value can be set to `null` to show that there is no bound)
+
+0.9
+---
+- added option to dynamically stop the algorithm by the user (by returning `null` by the `getValues` method in class implementing `DifferentiableFunction` interface)
+
+0.8 (2009-01-05)
+----------------
+Initial public release
