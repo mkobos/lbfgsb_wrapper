@@ -4,13 +4,13 @@ by Mateusz Kobos
 
 Introduction
 ------------
-L-BFGS-B is a limited-memory quasi-Newton optimization algorithm for solving large nonlinear optimization problems with simple bounds on the variables [Zhu97]. It employs function's value and gradient information to search for the local optimum. It uses (as the name suggests) the BGFS (Broyden-Goldfarb-Fletcher-Shanno) algorithm to approximate the hessian. The size of the memory available to store the approximation of the hessian is limited and is a parameter of the algorithm. Each of the `x_i` variables of the optimized function can be bounded i.e. we can define such numbers `l_i` and `u_i` that `l_i <= x_i <= u_i`.
+L-BFGS-B is a limited-memory quasi-Newton optimization algorithm for solving large nonlinear optimization problems with simple bounds on the variables [Zhu97]. It employs function's value and gradient information to search for the local optimum. It uses (as the name suggests) the BGFS (Broyden-Goldfarb-Fletcher-Shanno) algorithm to approximate the Hessian. The size of the memory available to store the approximation of the Hessian is limited and is a parameter of the algorithm. Each of the `x_i` variables of the optimized function can be bounded i.e. we can define such numbers `l_i` and `u_i` that `l_i <= x_i <= u_i`.
 
-The original implementation of the algorithm is written in the Fortran 77 language and is available on the authors' [original distribution website][]. I have developed a Java wrapper library for the Fortran code. The wrapper library uses JNI with SWIG to create the proxy code. A by-product of the Java wrapper is a quite low-level C wrapper for the Fortran code. In short, the structure of the wrapping layers looks as follows: `Fortran -> C -> JNI by SWIG -> Java`.
+The original implementation of the algorithm is written in the Fortran language and is available on the authors' [original distribution website][]. I have developed a Java wrapper library for the Fortran code. The wrapper library uses JNI with SWIG to create the proxy code. A by-product of the Java wrapper is a quite low-level C wrapper for the Fortran code. In short, the structure of the wrapping layers looks as follows: `Fortran -> C -> JNI by SWIG -> Java`.
 
 [original distribution website]: http://www.ece.northwestern.edu/~nocedal/lbfgsb.html
 
-If you have any comments, questions, bug reports or bug fixes, please contact the [author](http://www.mini.pw.edu.pl/~mkobos/).
+If you have any comments, questions, bug reports, bug fixes, etc., please contact the [author](http://www.mini.pw.edu.pl/~mkobos/).
 
 Download
 --------
@@ -31,8 +31,7 @@ License and conditions of use
 Requirements
 ------------
 - Linux operating system (the code was tested on Ubuntu 8.10, 9.04, 9.10, 10.04, 10.10, and 11.04 systems)
-- gcc and f77 compilers
-- f2c library (Ubuntu packages: `libf2c2-dev`, `fort77`)
+- gcc and gfortran compilers (Ubuntu packages: `build-essential` and `gfortran`)
 - SWIG program/library (Ubuntu package: `swig`)
 - Java JDK 6 (the code should also work with JDK 1.5) with environmental variable `JAVA_HOME` properly set
 - Apache Ant
@@ -50,7 +49,7 @@ In the following code (see `SampleRun.java` file in the source package), we want
 			try {
 				QuadraticFun fun = new QuadraticFun();
 				Minimizer alg = new Minimizer();
-				ArrayList&lt;Bound&gt; bounds = new ArrayList&lt;Bound&gt;();
+				ArrayList<Bound> bounds = new ArrayList<Bound>();
 				bounds.add(new Bound(new Double(10), null));
 				alg.setBounds(bounds);
 				Result result = alg.run(fun, new double[]{40});
@@ -77,7 +76,8 @@ After executing the code, we obtain the following output:
 	Calculating function for x=35.0
 	Calculating function for x=10.0
 	The final result: point=[10.0], functionValue=196.0, gradient=[28.0], 
-	iterationsInfo=(iterations=2, functionEvaluations=4, stopType=OTHER_STOP_CONDITIONS, stateDescription=CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL)
+		iterationsInfo=(iterations=2, functionEvaluations=4, stopType=OTHER_STOP_CONDITIONS, 
+			stateDescription=CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL)
 
 Handling source package
 -----------------------

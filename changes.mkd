@@ -1,3 +1,10 @@
+1.1 (2011-11-15)
+----------------
+- new version of the Fortran L-BFGS-B library used (v3.0) (by Jesús Cerquides)
+- Fortran code compiled with gfortran instead of f77 (by Jesús Cerquides)
+- small fixes in the README (by Mateusz Kobos)
+- moved code of the Fortran library into a separate directory, small changes in the raw wrapper's makefile (by Mateusz Kobos)
+
 1.0.2 (2011-10-12)
 ------------------
 - changed documentation format from HTML to markdown
