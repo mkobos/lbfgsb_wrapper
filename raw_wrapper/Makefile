@@ -1,5 +1,5 @@
 CC = gcc
-F77 = gfortran
+FC = gfortran
 
 CFLAGS_DEBUG = -fPIC -Wall -g
 CFLAGS_RELEASE = -fPIC -Wall -O3
@@ -32,17 +32,17 @@ build/test_prog.o: test_prog.c
 build/lbfgsb_wrapper.o: lbfgsb_wrapper.c lbfgsb_wrapper.h
 	$(CC) $(CFLAGS) -c lbfgsb_wrapper.c -o build/lbfgsb_wrapper.o
 
-build/solver.o: solver.f
-	$(F77) $(FFLAGS) -c solver.f -o build/solver.o
+build/solver.o: fortran_src/solver.f
+	$(FC) $(FFLAGS) -c fortran_src/solver.f -o build/solver.o
 
-build/blas.o: blas.f
-	$(F77) $(FFLAGS) -c blas.f -o build/blas.o
+build/blas.o: fortran_src/blas.f
+	$(FC) $(FFLAGS) -c fortran_src/blas.f -o build/blas.o
 
-build/linpack.o: linpack.f
-	$(F77) $(FFLAGS) -c linpack.f -o build/linpack.o
+build/linpack.o: fortran_src/linpack.f
+	$(FC) $(FFLAGS) -c fortran_src/linpack.f -o build/linpack.o
 
-build/timer.o: timer.f
-	$(F77) $(FFLAGS) -c timer.f -o build/timer.o
+build/timer.o: fortran_src/timer.f
+	$(FC) $(FFLAGS) -c fortran_src/timer.f -o build/timer.o
 	
 clean:
 	#cd build && rm -f -r *
