@@ -1,3 +1,7 @@
+1.1.1 (2011-11-15)
+------------------
+- removed `.git` directory from source package
+
 1.1 (2011-11-15)
 ----------------
 - new version of the Fortran L-BFGS-B library used (v3.0) (by Jesús Cerquides)

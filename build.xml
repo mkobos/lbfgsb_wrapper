@@ -4,7 +4,7 @@
 	<!-- Properties { -->
 	<property name="build.debug" value="true"/>
 	<property name="project.name" value="lbfgsb_wrapper"/>
-	<property name="project.version" value="1.1"/>
+	<property name="project.version" value="1.1.1"/>
 	<property name="project.name-ver" value="${project.name}-${project.version}" />
 	<!-- Properties } -->
 	
@@ -247,6 +247,7 @@
 				<exclude name="**/dist/**"/>
 				<exclude name="**/build/**"/>
 				<exclude name="website/**"/>
+				<exclude name=".git/**"/>
 			</tarfileset>
 			<tarfileset dir="." prefix="${project.name-ver}-src" filemode="755">
 				<include name="bin/*"/>
