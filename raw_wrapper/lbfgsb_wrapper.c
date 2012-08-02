@@ -24,7 +24,7 @@ struct lbfgsb* lbfgsb_create(int n, int m){
 	for(i = 0; i < n; i++) data->g[i] = 0;
 	data->factr = 1e7;
 	data->pgtol = 1e-5;
-	int wa_size = (2*m + 4)*n + 12*m*(m + 1);
+	int wa_size = 2*m*n + 5*n + 11*m*m + 8*m;
 	data->wa = malloc(wa_size*sizeof(double));
 	data->iwa = malloc(3*n*sizeof(int));
 	//hack to make a proper C-string from Fortran's space-padded string
