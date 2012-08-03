@@ -30,7 +30,7 @@ License and conditions of use
 
 Requirements
 ------------
-- Linux operating system (the code was tested on Ubuntu 8.10, 9.04, 9.10, 10.04, 10.10, and 11.04 systems)
+- Linux operating system (the code was tested on Ubuntu 8.10, 9.04, 9.10, 10.04, 10.10, 11.10 and 12.04 systems)
 - gcc and gfortran compilers (Ubuntu packages: `build-essential` and `gfortran`)
 - SWIG program/library (Ubuntu package: `swig`)
 - Java JDK 6 (the code should also work with JDK 1.5) with environmental variable `JAVA_HOME` properly set

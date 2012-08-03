@@ -1,13 +1,17 @@
+1.1.2 (2012-08-03)
+------------------
+- changed value of the `wa_size` variable ("total work space") from the `lbfgsb_wrapper.c` file to the value appropriate for the v3.0 of the L-BFGS-B library (see comment in the header of the `solver.f` file) - by Michael Allman
+
 1.1.1 (2011-11-15)
 ------------------
 - removed `.git` directory from source package
 
 1.1 (2011-11-15)
 ----------------
-- new version of the Fortran L-BFGS-B library used (v3.0) (by Jesús Cerquides)
-- Fortran code compiled with gfortran instead of f77 (by Jesús Cerquides)
+- new version of the Fortran L-BFGS-B library used (v3.0) - by Jesús Cerquides
+- Fortran code compiled with gfortran instead of f77 - by Jesús Cerquides
 - small fixes in the README (by Mateusz Kobos)
-- moved code of the Fortran library into a separate directory, small changes in the raw wrapper's makefile (by Mateusz Kobos)
+- moved code of the Fortran library into a separate directory, small changes in the raw wrapper's makefile - by Mateusz Kobos
 
 1.0.2 (2011-10-12)
 ------------------
