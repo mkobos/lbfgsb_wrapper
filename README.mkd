@@ -94,7 +94,19 @@ See:
 * `ant` - create the library and javadocs
 * `ant test` - run tests using some popular minimization problems
 
-Warning: the `JAVA_PATH` environment variable has to be properly set since it is used while compiling the `liblbfgsb_wrapper.so` library.
+Warning: the `JAVA_HOME` environment variable has to be properly set since it is used while compiling the `liblbfgsb_wrapper.so` library.
+
+#### MacOSX
+
+On OSX, these are the additional steps you may need to execute before building the project with `ant` succeeds:
+
+* Install `gfortran` from [http://hpc.sourceforge.net](http://hpc.sourceforge.net) or [http://sourceforge.net/projects/hpc/files/hpc/g95/gfortran-mlion.tar.gz](http://sourceforge.net/projects/hpc/files/hpc/g95/gfortran-mlion.tar.gz)
+* `sudo port install swig`
+* `sudo port install swig-java`
+* If building the project with ant fails with a message "jni.h can't be found", execute the following steps:
+	* make sure that `JAVA_HOME` is set properly, i.e. that `JAVA_HOME=/Library/Java/Home`,
+	* execute: `ln -s /System/Library/Frameworks/JavaVM.framework/Headers /Library/Java/Home/include` (this is because `jni.h` lives in `/System/Library/Frameworks/JavaVM.framework/Headers`). 
+* Build the project with ant and rename `.so` file to `.dylib`:  `mv liblbfgsb_wrapper.so liblbfgsb_wrapper.dylib`
 
 References
 ----------

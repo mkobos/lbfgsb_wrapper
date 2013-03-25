@@ -1,3 +1,7 @@
+1.1.3 (2012-03-25)
+------------------
+- Update of the README file with instructions on how to compile project on MacOSX
+
 1.1.2 (2012-08-03)
 ------------------
 - changed value of the `wa_size` variable ("total work space") from the `lbfgsb_wrapper.c` file to the value appropriate for the v3.0 of the L-BFGS-B library (see comment in the header of the `solver.f` file) - by Michael Allman
