@@ -1,7 +1,6 @@
 Java wrapper for the Fortran L-BFGS-B algorithm
 ===============================================
-[![Build Status](https://travis-ci.org/mkobos/lbfgsb_wrapper.png?branch=master)](https://travis-ci.org/mkobos/lbfgsb_wrapper)
-by Mateusz Kobos
+by Mateusz Kobos [![Build Status](https://travis-ci.org/mkobos/lbfgsb_wrapper.png?branch=master)](https://travis-ci.org/mkobos/lbfgsb_wrapper)
 
 Introduction
 ------------
