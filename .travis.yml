@@ -1,3 +1,5 @@
 language: java
+jdk:
+  - oraclejdk8
 before_install:
   - sudo apt-get install -qq gfortran swig junit junit4
