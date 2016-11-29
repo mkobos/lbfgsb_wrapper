@@ -28,7 +28,9 @@ public class Minimizer{
 	}
 	/** Set number of corrections used in the limited memory matrix. 
 	 * According to the original fortran documentation,
-	 * [3, 20] range is recommended.*/
+	 * [3, 20] range is recommended.
+	 * @param value number of corrections
+	 */
 	public void setCorrectionsNo(int value){
 		this.correctionsNo = value;
 	}
@@ -50,6 +52,7 @@ public class Minimizer{
 	}
 	/**
 	 * A convenience method that makes all of the variables unbounded
+	 * @param variablesNo number of variables in the problem
 	 */
 	public void setNoBounds(int variablesNo){
 		ArrayList<Bound> bounds = new ArrayList<Bound>();
@@ -60,6 +63,7 @@ public class Minimizer{
 	
 	/**
 	 * Set the listener which will be called after each iteration
+	 * @param listener called after the iteration is finished
 	 */
 	public void setIterationFinishedListener(
 			IterationFinishedListener listener){
@@ -82,6 +86,7 @@ public class Minimizer{
 	 * Starts the algorithm
 	 * @param fun function we want to minimize
 	 * @param startingPoint starting point of the algorithm
+	 * @return result of the minimization
 	 * @throws LBFGSBException thrown if the input parameters were erroneous
 	 */
 	public Result run(DifferentiableFunction fun, double[] startingPoint) 
