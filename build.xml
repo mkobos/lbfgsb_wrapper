@@ -6,12 +6,15 @@
 	<property name="project.name" value="lbfgsb_wrapper"/>
 	<property name="project.version" value="1.1.3-SNAPSHOT"/>
 	<property name="project.name-ver" value="${project.name}-${project.version}" />
+	<!-- use iswindows=1 for cross-platform MinGW builds -->
 	<condition property="iswindows" value="1" else="0">
 		<os family="windows"/>
 	</condition>
 	<property name="CC" value="gcc"/>
 	<property name="FC" value="gfortran"/>
-	<property name="LIBGFORTRAN" value="-lgfortran"/>
+	<property name="LIB_DEPENDENCIES" value="-lgfortran"/>
+	<!-- point to architecture-specific JNI headers
+outside of JAVA_HOME (e.g., downloaded from hg.openjdk.java.net) -->
 	<property name="JNI_ARCH_DIR" value=""/>
 	<!-- Properties } -->
 	
@@ -74,7 +77,10 @@
 		description="Execute default task i.e. create distribution files"/>
 
 	<target name="test" depends="unit-tests"
-		description="compile and run all the tests"/>
+		description="run all the tests compiling them first"/>
+	
+	<target name="test-without-compiling" depends="unit-tests-without-compiling"
+		description="run all the tests without compiling them first"/>
 	
 	<target name="init">
 	  	<!-- Create the buildtime property containing the date 
@@ -110,7 +116,7 @@
 			<arg value="WINDOWS=${iswindows}"/>
 			<arg value="CC=${CC}"/>
 			<arg value="FC=${FC}"/>
-			<arg value="LIBGFORTRAN=${LIBGFORTRAN}"/>
+			<arg value="LIB_DEPENDENCIES=${LIB_DEPENDENCIES}"/>
 			<arg value="JNI_ARCH_DIR=${JNI_ARCH_DIR}"/>
 			<arg value="LIB_NAME=${raw_wrapper.lib.name}"/>
 		</exec>
@@ -150,10 +156,12 @@
 		(this entry is needed because we're using external system-dependent library)-->
 	<property environment="env"/>
 	
+	<target name="unit-tests" depends="test-compile,unit-tests-without-compiling"/>
+	
 	<!-- Run all JUnit tests where:
 		errorProperty="test.failed" and failureProperty="test.failed" - save
 			failures and errors to the given property -->		
-	<target name="unit-tests" depends="test-compile">
+	<target name="unit-tests-without-compiling">
 		<junit printsummary="false"
 			errorProperty="test.failed"
 			failureProperty="test.failed"

@@ -1,6 +1,6 @@
 CC = gcc
 FC = gfortran
-LIBGFORTRAN = -lgfortran
+LIB_DEPENDENCIES = -lgfortran
 
 CFLAGS_DEBUG = -fPIC -Wall -g
 CFLAGS_RELEASE = -fPIC -Wall -O3
@@ -47,11 +47,11 @@ dist/$(LIB_NAME): build/lbfgsb_wrapper.o build/solver.o  build/blas.o build/linp
 	mkdir -p dist/src/lbfgsb/jniwrapper
 	swig -java -package lbfgsb.jniwrapper -outdir dist/src/lbfgsb/jniwrapper lbfgsb_wrapper.i
 	$(CC) -I $(JAVA_HOME)/include -I $(JNI_ARCH_DIR_AUTO) -fPIC -c lbfgsb_wrapper_wrap.c -o build/lbfgsb_wrapper_wrap.o #JAVA_HOME environment variable has to be set
-	$(CC) $(LDFLAGS) -shared -o dist/$(LIB_NAME) build/lbfgsb_wrapper_wrap.o build/lbfgsb_wrapper.o build/solver.o build/blas.o build/linpack.o build/timer.o -lm $(LIBGFORTRAN)
+	$(CC) $(LDFLAGS) -shared -o dist/$(LIB_NAME) build/lbfgsb_wrapper_wrap.o build/lbfgsb_wrapper.o build/solver.o build/blas.o build/linpack.o build/timer.o -lm $(LIB_DEPENDENCIES)
 	
 
 dist/test_prog: build/test_prog.o build/lbfgsb_wrapper.o build/solver.o build/blas.o build/linpack.o build/timer.o
-	$(CC) -o dist/test_prog build/test_prog.o build/lbfgsb_wrapper.o build/solver.o build/blas.o build/linpack.o build/timer.o -lm $(LIBGFORTRAN)
+	$(CC) -o dist/test_prog build/test_prog.o build/lbfgsb_wrapper.o build/solver.o build/blas.o build/linpack.o build/timer.o -lm $(LIB_DEPENDENCIES)
 
 build/test_prog.o: test_prog.c
 	$(CC) $(CFLAGS) -c test_prog.c -o build/test_prog.o

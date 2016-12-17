@@ -12,7 +12,7 @@ The original implementation of the algorithm is written in the Fortran language 
 
 ## Download
 
-The stable source of the current version of the library can be downloaded from [https://github.com/mkobos/lbfgsb_wrapper](https://github.com/mkobos/lbfgsb_wrapper "GitHub project page") or retrieved straight from the Git repository: `git clone git@github.com:mkobos/lbfgsb_wrapper.git`.
+The stable source of the current version of the library can be downloaded from [https://github.com/mkobos/lbfgsb_wrapper](https://github.com/mkobos/lbfgsb_wrapper "GitHub project page") or retrieved straight from the Git repository with `git clone git@github.com:mkobos/lbfgsb_wrapper.git`.
 
 ## Reliability
 
@@ -26,7 +26,7 @@ The stable source of the current version of the library can be downloaded from [
 
 ## Requirements
 
-- Linux operating system (the code was tested on Ubuntu 16.04 system and on some older versions of Ubuntu)
+- The library was developed with Linux operating system in mind (the code was tested on Ubuntu 16.04 system and on some older versions of Ubuntu) but it also can be made to work on MacOS and Windows (see the section "Building from source files" for details).
 - gcc and gfortran compilers (Ubuntu packages: `build-essential` and `gfortran`)
 - SWIG program/library (Ubuntu package: `swig`)
 - Java JDK 8 (but the code should also work with slightly older versions of JDK) with environmental variable `JAVA_HOME` properly set
@@ -75,25 +75,28 @@ After executing the code, we obtain the following output:
 		iterationsInfo=(iterations=2, functionEvaluations=4, stopType=OTHER_STOP_CONDITIONS, 
 			stateDescription=CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL)
 
-## Handling source package
+## The most important source files
 
-### The most important files
-
-See:
-
-* `run1.sh` and `run2.sh` scripts for an example of how to execute some simple code that uses the library
+* `bin` - directory that contains scripts showing how to run the library
 * `changes.mkd` for list of changes in subsequent releases
 * `license.txt` for the text of the BSD license for this library
 
-### Building from source files
+## Building from source files
+
+General information:
+
 * `ant` - create the library and javadocs
 * `ant test` - run tests using some popular minimization problems
 
 Warning: the `JAVA_HOME` environment variable has to be properly set since it is used while compiling the `liblbfgsb_wrapper.so` library.
 
-#### MacOSX
+### Linux
 
-On OSX, these are the additional steps you may need to execute before building the project with `ant` succeeds:
+On Linux, it should work out of the box if the required tools are present (see the "Requirements" section).
+
+### MacOSX
+
+On MacOSX, these are the additional steps you may need to execute before building the project with `ant` succeeds:
 
 * Install `gfortran` from [http://hpc.sourceforge.net](http://hpc.sourceforge.net) or [http://sourceforge.net/projects/hpc/files/hpc/g95/gfortran-mlion.tar.gz](http://sourceforge.net/projects/hpc/files/hpc/g95/gfortran-mlion.tar.gz)
 * `sudo port install swig`
@@ -102,6 +105,32 @@ On OSX, these are the additional steps you may need to execute before building t
 	* make sure that `JAVA_HOME` is set properly, i.e. that `JAVA_HOME=/Library/Java/Home`,
 	* execute: `ln -s /System/Library/Frameworks/JavaVM.framework/Headers /Library/Java/Home/include` (this is because `jni.h` lives in `/System/Library/Frameworks/JavaVM.framework/Headers`). 
 * Build the project with ant and rename `.so` file to `.dylib`:  `mv liblbfgsb_wrapper.so liblbfgsb_wrapper.dylib`
+
+### Windows
+
+If you want **build the sources on Linux so the resulting binaries work on Windows** (tested on Ubuntu 16.04 and Windows 10), this is what you need to do (for a case of a 64-bit Ubuntu system and a 64-bit Windows system):
+
+- Install package `gfortran-mingw-w64` (some other required packages should be pulled as dependencies).
+- Download Windows JNI headers (because these are usually not packaged) to the root directory of the project:
+
+        if [ ! -d jni_include ] ; then
+          mkdir -p jni_include/win32 || exit 1
+          cd jni_include/win32
+          wget http://hg.openjdk.java.net/jdk6/jdk6/jdk/raw-file/ac1d168048bd/src/windows/javavm/export/jni_md.h || exit 1
+          wget http://hg.openjdk.java.net/jdk6/jdk6/jdk/raw-file/ac1d168048bd/src/windows/javavm/export/jawt_md.h || exit 1
+          cd ../..
+        fi
+
+- Set an environment variable to be used later: `JNI_ARCH_DIR=$(pwd)/jni_include/win32`
+- Compile the library using cross-compilers (these are given in `DCC` and `DFC` parameters): `ant -Diswindows=1 -DCC=x86_64-w64-mingw32-gcc -DFC=x86_64-w64-mingw32-gfortran -DJNI_ARCH_DIR="$JNI_ARCH_DIR" -DLIB_DEPENDENCIES="-Wl,-Bstatic -lgfortran -lquadmath -lpthread -static-libgcc"`
+    - Note that this command compiles a number of libraries statically using the `-Wl,-Bstatic` switch. This is done so you don't have to put Windows versions of these libraries (as `*.dll` files) in `PATH` environmental variable under Windows for the library to work.
+    - If you want easily distributable binaries, you can avoid linking statically `libquadmath` using the following trick: `-DLIB_DEPENDENCIES="-Wl,--defsym,${UNDERSCORE}quadmath_snprintf=${UNDERSCORE}abort -Wl,-Bstatic -lgfortran -lpthread -static-libgcc"` where `UNDERSCORE=` (i.e. empty) on x86_64, `UNDERSCORE=_` on i*86, which means you don't have to ship the whole LGPLed `libquadmath` sources with your binaries (and actually, also the source code of everything else that you statically linked, including `libgfortran`, to allow for relinking with a modified `libquadmath`) just for a single function that is never even actually called (`libgfortran` and `libgcc` are under the GPL with GCC runtime exception, and `winpthread` under a BSD license, which means you are not obligated to ship any sources for those libraries with statically-linked binaries.).
+
+If you want to **build the tests of on Linux and then run them on Windows** you need to:
+
+- On Linux: compile the tests for Windows: `ant -Diswindows=1 -DCC=x86_64-w64-mingw32-gcc -DFC=x86_64-w64-mingw32-gfortran -DJNI_ARCH_DIR="$JNI_ARCH_DIR" -DLIB_DEPENDENCIES="-Wl,-Bstatic -lgfortran -lquadmath -lpthread -static-libgcc" test-compile`
+- On Windows: run compiled tests from the root directory of the project: `bin/windows_test_without_compiling.bat dist/lbfgsb_wrapper-1.1.3-SNAPSHOT.jar` (you need to change the name of the JAR file appropriately)
+
 
 ## References
 
