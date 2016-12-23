@@ -1,4 +1,4 @@
 REM Run the script in the root directory of the project.
 
-PATH=%PATH%;./dist
+PATH=%PATH%;.\dist
 ant test-without-compiling
