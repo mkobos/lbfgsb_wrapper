@@ -6,13 +6,13 @@ by Mateusz Kobos [![Build Status](https://travis-ci.org/mkobos/lbfgsb_wrapper.pn
 
 L-BFGS-B is a limited-memory quasi-Newton optimization algorithm for solving large nonlinear optimization problems with simple bounds on the variables [Zhu97]. It employs function's value and gradient information to search for the local optimum. It uses (as the name suggests) the BGFS (Broyden-Goldfarb-Fletcher-Shanno) algorithm to approximate the Hessian. The size of the memory available to store the approximation of the Hessian is limited and is a parameter of the algorithm. Each of the `x_i` variables of the optimized function can be bounded i.e. we can define such numbers `l_i` and `u_i` that `l_i <= x_i <= u_i`.
 
-The original implementation of the algorithm is written in the Fortran language and is available on the authors' [original distribution website][]. I have developed a Java wrapper library for the Fortran code. The wrapper library uses JNI with SWIG to create the proxy code. A by-product of the Java wrapper is a quite low-level C wrapper for the Fortran code. In short, the structure of the wrapping layers looks as follows: `Fortran -> C -> JNI by SWIG -> Java`.
+The original implementation of the algorithm is written in the Fortran language and is available on the authors' [original distribution website][]. This is a Java wrapper library for the Fortran code. The wrapper library uses JNI with SWIG to create the proxy code. A by-product of the Java wrapper is a quite low-level C wrapper for the Fortran code. In short, the structure of the wrapping layers looks as follows: `Fortran -> C -> JNI by SWIG -> Java`.
 
 [original distribution website]: http://www.ece.northwestern.edu/~nocedal/lbfgsb.html
 
 ## Download
 
-The stable source of the current version of the library can be downloaded from [https://github.com/mkobos/lbfgsb_wrapper](https://github.com/mkobos/lbfgsb_wrapper "GitHub project page") or retrieved straight from the Git repository with `git clone git@github.com:mkobos/lbfgsb_wrapper.git`.
+The source code of the current version of the library can be downloaded from [https://github.com/mkobos/lbfgsb_wrapper](https://github.com/mkobos/lbfgsb_wrapper "GitHub project page") or retrieved straight from the Git repository with `git clone git@github.com:mkobos/lbfgsb_wrapper.git`.
 
 ## Reliability
 
@@ -26,10 +26,10 @@ The stable source of the current version of the library can be downloaded from [
 
 ## Requirements
 
-- The library was developed with Linux operating system in mind (the code was tested on Ubuntu 16.04 system and on some older versions of Ubuntu) but it also can be made to work on MacOS and Windows (see the section "Building from source files" for details).
+- The library was developed with Linux operating system in mind (the code was tested on Ubuntu 16.04 system and on some older versions of Ubuntu) but it can also be made to work on MacOS and Windows (see the section "Building from source files" for details).
 - gcc and gfortran compilers (Ubuntu packages: `build-essential` and `gfortran`)
 - SWIG program/library (Ubuntu package: `swig`)
-- Java JDK 8 (but the code should also work with slightly older versions of JDK) with environmental variable `JAVA_HOME` properly set
+- Java JDK 8 (but the code should work with slightly older versions of JDK as well) with environmental variable `JAVA_HOME` properly set
 - Apache Ant
 
 ## Example usage
@@ -77,13 +77,13 @@ After executing the code, we obtain the following output:
 
 ## The most important source files
 
-* `bin` - directory that contains scripts showing how to run the library
+* `bin` - directory with scripts that show how to run the library
 * `changes.mkd` for list of changes in subsequent releases
 * `license.txt` for the text of the BSD license for this library
 
 ## Building from source files
 
-General information:
+General commands:
 
 * `ant` - create the library and javadocs
 * `ant test` - run tests using some popular minimization problems
@@ -110,7 +110,7 @@ On MacOSX, these are the additional steps you may need to execute before buildin
 
 If you want **build the sources on Linux so the resulting binaries work on Windows** (tested on Ubuntu 16.04 and Windows 10), this is what you need to do (for a case of a 64-bit Ubuntu system and a 64-bit Windows system):
 
-- Install package `gfortran-mingw-w64` (some other required packages should be pulled as dependencies).
+- Install package `gfortran-mingw-w64` (some other required packages should be automatically pulled as dependencies).
 - Download Windows JNI headers (because these are usually not packaged) to the root directory of the project:
 
         if [ ! -d jni_include ] ; then
@@ -122,14 +122,14 @@ If you want **build the sources on Linux so the resulting binaries work on Windo
         fi
 
 - Set an environment variable to be used later: `JNI_ARCH_DIR=$(pwd)/jni_include/win32`
-- Compile the library using cross-compilers (these are given in `DCC` and `DFC` parameters): `ant -Diswindows=1 -DCC=x86_64-w64-mingw32-gcc -DFC=x86_64-w64-mingw32-gfortran -DJNI_ARCH_DIR="$JNI_ARCH_DIR" -DLIB_DEPENDENCIES="-Wl,-Bstatic -lgfortran -lquadmath -lpthread -static-libgcc"`
+- Compile the library using cross-compilers (these are given as `CC` and `FC` parameters): `ant -Diswindows=1 -DCC=x86_64-w64-mingw32-gcc -DFC=x86_64-w64-mingw32-gfortran -DJNI_ARCH_DIR="$JNI_ARCH_DIR" -DLIB_DEPENDENCIES="-Wl,-Bstatic -lgfortran -lquadmath -lpthread -static-libgcc"`
     - Note that this command compiles a number of libraries statically using the `-Wl,-Bstatic` switch. This is done so you don't have to put Windows versions of these libraries (as `*.dll` files) in `PATH` environmental variable under Windows for the library to work.
     - If you want easily distributable binaries, you can avoid linking statically `libquadmath` using the following trick: `-DLIB_DEPENDENCIES="-Wl,--defsym,${UNDERSCORE}quadmath_snprintf=${UNDERSCORE}abort -Wl,-Bstatic -lgfortran -lpthread -static-libgcc"` where `UNDERSCORE=` (i.e. empty) on x86_64, `UNDERSCORE=_` on i*86, which means you don't have to ship the whole LGPLed `libquadmath` sources with your binaries (and actually, also the source code of everything else that you statically linked, including `libgfortran`, to allow for relinking with a modified `libquadmath`) just for a single function that is never even actually called (`libgfortran` and `libgcc` are under the GPL with GCC runtime exception, and `winpthread` under a BSD license, which means you are not obligated to ship any sources for those libraries with statically-linked binaries.).
 
-If you want to **build the tests of on Linux and then run them on Windows** you need to:
+If you want to **build the tests on Linux and then run them on Windows** you need to:
 
-- On Linux: compile the tests for Windows: `ant -Diswindows=1 -DCC=x86_64-w64-mingw32-gcc -DFC=x86_64-w64-mingw32-gfortran -DJNI_ARCH_DIR="$JNI_ARCH_DIR" -DLIB_DEPENDENCIES="-Wl,-Bstatic -lgfortran -lquadmath -lpthread -static-libgcc" test-compile`
-- On Windows: run compiled tests from the root directory of the project: `bin/windows_test_without_compiling.bat dist/lbfgsb_wrapper-1.1.3-SNAPSHOT.jar` (you need to change the name of the JAR file appropriately)
+1. On Linux: compile the tests for Windows: `ant -Diswindows=1 -DCC=x86_64-w64-mingw32-gcc -DFC=x86_64-w64-mingw32-gfortran -DJNI_ARCH_DIR="$JNI_ARCH_DIR" -DLIB_DEPENDENCIES="-Wl,-Bstatic -lgfortran -lquadmath -lpthread -static-libgcc" test-compile`
+2. On Windows: run compiled tests from the root directory of the project: `bin/windows_test_without_compiling.bat dist/lbfgsb_wrapper-1.1.3-SNAPSHOT.jar` (you need to change the name of the JAR file appropriately)
 
 
 ## References
